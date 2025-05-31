@@ -140,8 +140,9 @@ if retrieval:
 #    - 쿼터 문제로 인해, 특정 LLM 모델이 제한될 수 있으므로
 #      필요하다면 다른 LLM(예: "text-bison@001")으로 폴백할 수도 있습니다.
 try:
-    llm_agent = GenerativeModel("gemini-2.0-flash-001", tools=[rag_tool] if rag_tool else [])
-    print("▶ LLM 에이전트(gemini-2.0-flash-001) 초기화 성공")
+    model = "gemini-2.0-flash-lite-001"#"gemini-2.0-flash-001"
+    llm_agent = GenerativeModel(model, tools=[rag_tool] if rag_tool else [])
+    print("▶ LLM 에이전트(",model, ") 초기화 성공")
 except Exception as e:
     print("⚠️ 기본 LLM 초기화 실패:", e)
     # 예를 들어, "text-bison@001" 으로 폴백
