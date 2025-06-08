@@ -83,9 +83,22 @@ def run_conversation_flow():
 
     response_text = ""
     for event in app.stream_query(user_id=user_id, session_id=session_id, message=first_message):
-        if hasattr(event, 'text'):
-            response_text += event.text
-            print(event.text, end="", flush=True)
+        #print(event)
+        for part in event['content']['parts']:
+            # 1) 순수 텍스트 파트
+            if 'text' in part:
+                print(part['text'], end="", flush=True)
+
+            # 2) 함수 호출 파트
+            elif 'function_call' in part:
+                fc = part['function_call']
+                print(f"\n[Function Call] name={fc['name']} args={fc['args']}")
+
+            # 3) 함수 응답(도구 실행 결과) 파트
+            elif 'function_response' in part or 'tool_response' in part:
+                # ADK 버전에 따라 키 이름이 달라질 수 있으니 둘 다 처리
+                fr = part.get('function_response') or part.get('tool_response')
+                print(f"\n[Tool Response] {fr['response']['result']}\n")           
     print()
 
     # --- 두 번째 사용자 입력 (세션 유지) ---
@@ -99,9 +112,21 @@ def run_conversation_flow():
 
     response_text = ""
     for event in app.stream_query(user_id=user_id, session_id=session_id, message=second_message):
-        if hasattr(event, 'text'):
-            response_text += event.text
-            print(event.text, end="", flush=True)
+        for part in event['content']['parts']:
+            # 1) 순수 텍스트 파트
+            if 'text' in part:
+                print(part['text'], end="", flush=True)
+
+            # 2) 함수 호출 파트
+            elif 'function_call' in part:
+                fc = part['function_call']
+                print(f"\n[Function Call] name={fc['name']} args={fc['args']}")
+
+            # 3) 함수 응답(도구 실행 결과) 파트
+            elif 'function_response' in part or 'tool_response' in part:
+                # ADK 버전에 따라 키 이름이 달라질 수 있으니 둘 다 처리
+                fr = part.get('function_response') or part.get('tool_response')
+                print(f"\n[Tool Response] {fr['response']['result']}\n")           
     print()
 
     print("\n\n[시스템] 대화 시나리오가 성공적으로 종료되었습니다.")
