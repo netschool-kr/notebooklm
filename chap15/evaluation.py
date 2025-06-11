@@ -170,27 +170,32 @@ try:
     print("\n----- 평가 결과 -----")
 
     # 요약된 지표 결과 출력 (평균 점수 등)
-    if hasattr(eval_result, 'summary_metrics_table') and eval_result.summary_metrics_table:
+    summary_table = getattr(eval_result, 'summary_metrics_table', None)
+    if summary_table is not None and not summary_table.empty:
         print("\n=== 요약 지표 테이블 ===")
-        print(eval_result.summary_metrics_table)
-    
+        print(summary_table)
+    else:
+        print("\n요약 지표를 계산하지 못했습니다 (API 오류 또는 데이터 부족).")
+
     # 개별 인스턴스별 상세 지표 결과 출력
-    if hasattr(eval_result, 'metrics_table') and eval_result.metrics_table:
+    metrics_table = getattr(eval_result, 'metrics_table', None)
+    if metrics_table is not None and not metrics_table.empty:
         print("\n=== 상세 지표 테이블 ===")
-        # metrics_table은 DataFrame일 수 있으므로, 필요시 pandas로 출력 형식 조정
-        # 여기서는 간단히 반복하며 출력
-        for index, row in eval_result.metrics_table.iterrows():
+        for index, row in metrics_table.iterrows():
             print(f"\n--- 평가 대상: {row.get('candidate_model_name', 'N/A')} ---")
-            print(f"문서: {row.get('document_text', '')[:100]}...") # 원문 일부
-            print(f"요약: {row.get('generated_summary', '')[:100]}...") # 요약 일부
+            print(f"문서: {row.get('document_text', '')[:100]}...")
+            print(f"요약: {row.get('generated_summary', '')[:100]}...")
             for metric in metrics_to_evaluate:
-                metric_name = metric.metric
-                score = row.get(f"mean_score/{metric_name}", "N/A")
-                explanation = row.get(f"explanation/{metric_name}", "N/A")
+                # [최종 수정] 올바른 내부 속성인 metric._metric_name 으로 변경
+                metric_name = metric.metric_name
+                
+                # API 오류로 특정 지표가 없을 수 있으므로 .get()으로 안전하게 접근
+                score = row.get(f"{metric_name}/score", "오류/계산불가")
+                explanation = row.get(f"{metric_name}/explanation", "오류/계산불가")
                 print(f"  {metric_name}: 점수 = {score}, 이유 = {explanation}")
     else:
-        print("상세 평가 결과를 찾을 수 없습니다.")
+        print("\n상세 평가 결과를 찾을 수 없습니다.")
 
 except Exception as e:
-    print(f"평가 실행 중 오류 발생: {e}")
+    print(f"평가 실행 중 예상치 못한 오류 발생: {e}")
     eval_result = None
