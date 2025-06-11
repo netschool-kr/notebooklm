@@ -1,4 +1,11 @@
+import pandas as pd  # 1. 스크립트 상단에 pandas 추가
+import vertexai
+from vertexai.preview.evaluation import EvalTask
 from vertexai.preview.evaluation import PointwiseMetric
+import os
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
+LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION")
+vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 # 1. 충실도 (Faithfulness)
 # 요약이 원문 내용을 정확하게 반영하고, 원문에 없거나 모순되는 정보를 포함하지 않는지 평가
@@ -128,7 +135,7 @@ Vertex AI는 Google Cloud의 머신러닝 플랫폼으로, 모델 개발부터 �
 """
 # 평가 데이터셋 구성
 # 여기서는 앞서 생성한 baseline_summary_text와 improved_summary_text를 평가 대상으로 함
-EVAL_DATASET = [
+EVAL_DATASET = pd.DataFrame([
     {
         "document_text": original_document_content,
         "generated_summary": baseline_summary_text,
@@ -139,7 +146,7 @@ EVAL_DATASET = [
         "generated_summary": improved_summary_text,
         "candidate_model_name": "improved_prompt_summary" # 개선된 프롬프트 요약 식별자
     }
-]
+])
 
 # 평가할 지표 리스트
 metrics_to_evaluate = [
