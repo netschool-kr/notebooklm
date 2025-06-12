@@ -66,8 +66,7 @@
         }
 
         playButton.addEventListener('click', () => {
-            if (!audioPlayer.src |
-| audioPlayer.src === window.location.href) { // src가 없거나 현재 페이지 URL이면 (초기 상태)
+            if (!audioPlayer.src || audioPlayer.src === window.location.href) { // src가 없거나 현재 페이지 URL이면 (초기 상태)
                 alert("먼저 '음성 답변 듣기' 버튼을 눌러 오디오를 로드해주세요.");
                 return;
             }
