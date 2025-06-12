@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>TTS 음성 재생</title>
+</head>
+<body>
+    <h1>LLM 음성 답변</h1>
+    <p id="llmResponseText">LLM의 텍스트 답변이 여기에 표시됩니다...</p>
+    <audio id="audioPlayer" controls>
+        Your browser does not support the audio element.
+    </audio>
+    <br>
+    <button id="playButton">재생/일시정지</button>
+    <button id="fetchAudioButton">음성 답변 듣기</button>
+
+    <script>
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playButton = document.getElementById('playButton');
+        const fetchAudioButton = document.getElementById('fetchAudioButton');
+        const llmResponseTextElement = document.getElementById('llmResponseText');
+
+        let audioUrl = ''; // 백엔드로부터 전달받을 Signed URL 또는 오디오 파일 URL
+        let llmText = '';  // LLM 텍스트 응답
+
+        // 예시: 백엔드에서 LLM 응답과 오디오 URL을 받아오는 함수
+        async function fetchLLMResponseAndAudio() {
+            try {
+                // 실제 애플리케이션에서는 LLM 응답을 요청하고,
+                // 그 텍스트로 TTS를 요청하여 오디오 URL을 받아옵니다.
+                // 여기서는 하드코딩된 예시 값을 사용합니다.
+                
+                // 1. LLM 텍스트 응답 시뮬레이션
+                llmText = "안녕하세요, AI 에이전트입니다. 현재 시각은 오후 3시 15분입니다.";
+                llmResponseTextElement.textContent = llmText;
+
+                // 2. 백엔드 API를 호출하여 TTS 오디오 URL 가져오기 (가상)
+                // const response = await fetch(`/api/generate-tts?text=${encodeURIComponent(llmText)}`);
+                // if (!response.ok) {
+                //     throw new Error(`HTTP error! status: ${response.status}`);
+                // }
+                // const data = await response.json();
+                // audioUrl = data.audioUrl; // 실제 Signed URL 또는 오디오 파일 경로
+
+                // 테스트를 위한 임시 오디오 파일 URL (실제 URL로 교체 필요)
+                // 예: GCS Signed URL 또는 직접 접근 가능한 MP3 URL
+                // 이 URL은 실제 유효한 오디오 파일을 가리켜야 합니다.
+                // audioUrl = "YOUR_ACTUAL_SIGNED_URL_OR_AUDIO_FILE_URL_HERE.mp3"; 
+                // 데모를 위해 아래 공개된 샘플 오디오 사용 (실제로는 백엔드에서 생성/제공)
+                audioUrl = "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"; // MP4지만 audio 태그에서 재생 가능, MP3로 대체 권장
+
+                if (audioUrl) {
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.load(); // 새 src를 로드
+                    playButton.disabled = false;
+                    fetchAudioButton.textContent = "음성 다시 듣기";
+                } else {
+                    alert("오디오 URL을 가져오는 데 실패했습니다.");
+                    playButton.disabled = true;
+                }
+            } catch (error) {
+                console.error("Error fetching audio:", error);
+                alert("오디오를 가져오는 중 오류가 발생했습니다.");
+                playButton.disabled = true;
+            }
+        }
+
+        playButton.addEventListener('click', () => {
+            if (!audioPlayer.src |
+| audioPlayer.src === window.location.href) { // src가 없거나 현재 페이지 URL이면 (초기 상태)
+                alert("먼저 '음성 답변 듣기' 버튼을 눌러 오디오를 로드해주세요.");
+                return;
+            }
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playButton.textContent = '일시정지';
+            } else {
+                audioPlayer.pause();
+                playButton.textContent = '재생';
+            }
+        });
+        
+        fetchAudioButton.addEventListener('click', fetchLLMResponseAndAudio);
+
+        audioPlayer.onended = () => {
+            playButton.textContent = '재생';
+        };
+        
+        audioPlayer.oncanplaythrough = () => {
+            // 오디오가 충분히 로드되어 재생 가능할 때 (선택적)
+            console.log("Audio can be played through.");
+        };
+
+        audioPlayer.onerror = (e) => {
+            console.error("Audio player error:", e);
+            alert("오디오 재생 중 오류가 발생했습니다. URL을 확인해주세요.");
+            playButton.disabled = true;
+        };
+
+        // 초기 버튼 상태
+        playButton.disabled = true;
+
+    </script>
+</body>
+</html>
